@@ -13,10 +13,7 @@ export default defineConfig(({ mode }) => ({
     mainFields: ['module'],
   },
   plugins: [
-    analog({
-      // prerender: {
-      //   routes: ['/', '/about','/blog'],
-      // },
+    analog({ssr:false
     }),
   ],
   test: {
