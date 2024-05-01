@@ -1,12 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { injectContentFiles } from '@analogjs/content';
 import PostAttributes from '../../post-attributes';
 import { RouterLink } from '@angular/router';
-
+import { getPageBySlug } from 'src/app/services/contentful.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { injectLoad } from '@analogjs/router';
+import { load } from './index.server';
+import { JsonPipe } from '@angular/common';
 @Component({
   selector: 'app-blog',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink,JsonPipe],
   template: `
     <section class="bg-white dark:bg-gray-900">
       <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
@@ -23,7 +27,7 @@ import { RouterLink } from '@angular/router';
           </p>
         </div>
         <div class="grid gap-8 lg:grid-cols-2">
-          @for (post of posts;track post.attributes.slug) {
+
           <article
             class="p-6 bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700"
           >
@@ -41,20 +45,20 @@ import { RouterLink } from '@angular/router';
                     d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"
                   ></path>
                 </svg>
-                {{ post.attributes.category }}
+                {{ data()[0].fields.title}}
               </span>
-              <span class="text-sm">{{ post.attributes.time }}</span>
+              <!-- <span class="text-sm">{{ post.fields.title }}</span> -->
             </div>
             <h2
               class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
             >
-              <a [routerLink]="['/blog/', post.attributes.slug]">{{
+              <!-- <a [routerLink]="['/blog/', post.attributes.slug]">{{
                 post.attributes.title
-              }}</a>
+              }}</a> -->
             </h2>
-            <p class="mb-5 font-light text-gray-500 dark:text-gray-400">
-              {{ post.attributes.description }}
-            </p>
+            <div class="mb-5 font-light text-gray-500 dark:text-gray-400">
+              {{ data()[0].fields.description.content[0].content[0].value }}
+            </div>
             <div class="flex justify-between items-center">
               <div class="flex items-center space-x-4">
                 <img
@@ -63,11 +67,11 @@ import { RouterLink } from '@angular/router';
                   alt="Jese Leos avatar"
                 />
                 <span class="font-medium dark:text-white">
-                  {{ post.attributes.author }}
+                  <!-- {{ post.attributes.author }} -->
                 </span>
               </div>
               <a
-                [routerLink]="['/blog/', post.attributes.slug]"
+                [routerLink]="['/blog/']"
                 class="inline-flex items-center font-medium text-primary-600 dark:text-primary-500 hover:underline"
               >
                 Read more
@@ -86,7 +90,7 @@ import { RouterLink } from '@angular/router';
               </a>
             </div>
           </article>
-          }
+
         </div>
       </div>
     </section>
@@ -107,7 +111,7 @@ import { RouterLink } from '@angular/router';
   ],
 })
 export default class BlogComponent {
-  readonly posts = injectContentFiles<PostAttributes>((contentFile) =>
-    contentFile.filename.includes('/src/content/blog/')
-  );
+  data = toSignal(injectLoad<typeof load>(), { requireSync: true });
+  post=this.data()?.fields!;
+
 }

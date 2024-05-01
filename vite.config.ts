@@ -14,9 +14,9 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     analog({
-      // prerender: {
-      //   routes: ['/', '/about','/blog'],
-      // },
+      prerender: {
+        routes: ['/','/blog'],
+      },
     }),
   ],
   test: {
